@@ -1,11 +1,10 @@
 part of 'todo_bloc.dart';
 
-@immutable
 abstract class TodoEvent extends Equatable {
   const TodoEvent();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
 class TodoStarted extends TodoEvent {}
@@ -16,7 +15,7 @@ class AddTodoEvent extends TodoEvent {
   const AddTodoEvent(this.todo);
 
   @override
-  List<Object?> get props => [todo];
+  List<Object> get props => [todo];
 }
 
 class RemoveTodoEvent extends TodoEvent {
@@ -25,17 +24,8 @@ class RemoveTodoEvent extends TodoEvent {
   const RemoveTodoEvent(this.todo);
 
   @override
-  List<Object?> get props => [todo];
+  List<Object> get props => [todo];
 }
-
-// class AlterTodoEvent extends TodoEvent {
-//   final int index;
-
-//   const AlterTodoEvent(this.index);
-
-//   @override
-//   List<Object?> get props => [index];
-// }
 
 class AlterTodoEvent extends TodoEvent {
   final int index;
@@ -45,4 +35,13 @@ class AlterTodoEvent extends TodoEvent {
 
   @override
   List<Object> get props => [index, isDone];
+}
+
+class ChangeFilterEvent extends TodoEvent {
+  final TodoFilter filter;
+
+  const ChangeFilterEvent(this.filter);
+
+  @override
+  List<Object> get props => [filter];
 }

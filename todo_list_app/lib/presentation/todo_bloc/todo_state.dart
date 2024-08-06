@@ -2,43 +2,47 @@ part of 'todo_bloc.dart';
 
 enum TodoStatus { initial, loading, success, error }
 
+enum TodoFilter { all, completed, pending }
+
 class TodoState extends Equatable {
   final List<Todo> todos;
   final TodoStatus status;
+  final TodoFilter filter;
 
-  const TodoState(
-      {this.todos = const <Todo>[], this.status = TodoStatus.initial});
+  const TodoState({
+    this.todos = const [],
+    this.status = TodoStatus.initial,
+    this.filter = TodoFilter.all,
+  });
+
+  @override
+  List<Object> get props => [todos, status, filter];
 
   TodoState copyWith({
-    TodoStatus? status,
     List<Todo>? todos,
+    TodoStatus? status,
+    TodoFilter? filter,
   }) {
     return TodoState(
       todos: todos ?? this.todos,
       status: status ?? this.status,
+      filter: filter ?? this.filter,
     );
   }
 
-  @override
-  factory TodoState.fromJson(Map<String, dynamic> json) {
-    try {
-      var listOfTodos = (json['todo'] as List<dynamic>)
-          .map((e) => Todo.fromJson(e as Map<String, dynamic>))
-          .toList();
-
-      return TodoState(
-          todos: listOfTodos,
-          status: TodoStatus.values.firstWhere(
-              (element) => element.name.toString() == json['status']));
-    } catch (e) {
-      rethrow;
-    }
+  static TodoState fromJson(Map<String, dynamic> json) {
+    return TodoState(
+      todos: List<Todo>.from(json['todos'].map((x) => Todo.fromJson(x))),
+      status: TodoStatus.values[json['status']],
+      filter: TodoFilter.values[json['filter']],
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return {'todo': todos, 'status': status.name};
+    return {
+      'todos': todos.map((x) => x.toJson()).toList(),
+      'status': status.index,
+      'filter': filter.index,
+    };
   }
-
-  @override
-  List<Object?> get props => [todos, status];
 }

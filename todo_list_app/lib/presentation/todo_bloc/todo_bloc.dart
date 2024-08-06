@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import '../../data/models/todo.dart';
 
@@ -12,6 +11,7 @@ class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
     on<AddTodoEvent>(_onAddTodo);
     on<RemoveTodoEvent>(_onRemoveTodo);
     on<AlterTodoEvent>(_onAlterTodo);
+    on<ChangeFilterEvent>(_onChangeFilter);
   }
 
   void _onStarted(
@@ -61,6 +61,13 @@ class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
     } catch (e) {
       emit(state.copyWith(status: TodoStatus.error));
     }
+  }
+
+  void _onChangeFilter(
+    ChangeFilterEvent event,
+    Emitter<TodoState> emit,
+  ) {
+    emit(state.copyWith(filter: event.filter));
   }
 
   @override
