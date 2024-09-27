@@ -5,14 +5,14 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:todo_list_app/data/models/todo.dart';
 import 'package:todo_list_app/presentation/todo_bloc/todo_bloc.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class TodoScreen extends StatefulWidget {
+  const TodoScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<TodoScreen> createState() => _TodoScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _TodoScreenState extends State<TodoScreen> {
   addTodo(Todo todo) {
     context.read<TodoBloc>().add(AddTodoEvent(todo));
   }
@@ -28,6 +28,90 @@ class _HomeScreenState extends State<HomeScreen> {
   changeFilter(TodoFilter filter) {
     context.read<TodoBloc>().add(ChangeFilterEvent(filter));
     setState(() {});
+  }
+
+  void editTodo(Todo todo, int index) {
+    TextEditingController titleController =
+        TextEditingController(text: todo.title);
+    TextEditingController subtitleController =
+        TextEditingController(text: todo.subtitle);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                cursorColor: Theme.of(context).colorScheme.secondary,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Task Title...',
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: subtitleController,
+                cursorColor: Theme.of(context).colorScheme.secondary,
+                decoration: InputDecoration(
+                  hintText: 'Task Description...',
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty) {
+                  // Create updated todo object
+                  Todo updatedTodo = Todo(
+                    title: titleController.text,
+                    subtitle: subtitleController.text,
+                    isDone: todo.isDone, // Maintain the isDone status
+                  );
+                  // Dispatch the edit event
+                  context
+                      .read<TodoBloc>()
+                      .add(EditTodoEvent(todo: updatedTodo, index: index));
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Title is mandatory'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  );
+                }
+              },
+              child: const Text("Update"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -128,6 +212,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ],
                               ),
+                              endActionPane: ActionPane(
+                                motion: const ScrollMotion(),
+                                children: [
+                                  SlidableAction(
+                                    onPressed: (_) {
+                                      editTodo(
+                                          filteredTodos[i],
+                                          state.todos
+                                              .indexOf(filteredTodos[i]));
+                                    },
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 86, 204, 244),
+                                    foregroundColor: Colors.white,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10)),
+                                    icon: Icons.edit,
+                                    label: 'Edit',
+                                  ),
+                                ],
+                              ),
                               child: ListTile(
                                 title: Text(
                                   filteredTodos[i].title,
@@ -145,15 +249,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                trailing: Checkbox(
-                                  value: filteredTodos[i].isDone,
-                                  activeColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  onChanged: (value) {
-                                    alterTodo(
-                                        state.todos.indexOf(filteredTodos[i]),
-                                        value!);
-                                  },
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                        padding: EdgeInsets.zero,
+                                        icon: const Icon(Icons.edit,
+                                            size: 18, color: Colors.black),
+                                        onPressed: () {
+                                          editTodo(
+                                              filteredTodos[i],
+                                              state.todos
+                                                  .indexOf(filteredTodos[i]));
+                                        }),
+                                    Checkbox(
+                                      value: filteredTodos[i].isDone,
+                                      activeColor: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      onChanged: (value) {
+                                        alterTodo(
+                                            state.todos
+                                                .indexOf(filteredTodos[i]),
+                                            value!);
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

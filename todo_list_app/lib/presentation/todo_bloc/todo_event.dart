@@ -45,3 +45,13 @@ class ChangeFilterEvent extends TodoEvent {
   @override
   List<Object> get props => [filter];
 }
+
+class EditTodoEvent extends TodoEvent {
+  final Todo todo; // The updated Todo object
+  final int index; // The index of the Todo to be updated
+
+  const EditTodoEvent({required this.todo, required this.index});
+
+  @override
+  List<Object> get props => [todo, index];
+}
